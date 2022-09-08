@@ -99,8 +99,8 @@
             typingBox.Height = contentSize.Height;
         }
         void OnQueryItemTemplate(object sender, QueryItemTemplateEventArgs e) {
-            var message = e.Row as DevExpress.DevAV.Chat.Model.Message;
-           
+            //var message = e.Row as DevExpress.DevAV.Chat.Model.Message;
+            var message = e.Row as MessageDto;
             if (message == null)
                 return;
             if(message.IsOwnMessage)

@@ -18,10 +18,8 @@
     public class MessagesViewModel : ChannelViewModel {
         public MessagesViewModel()
             : base() {
-            Messages = new Message[0];
-
-            //MessageDtos = new List<MessageDto>();
-
+            //Messages = new Message[0];
+            Messages = new MessageDto[0];
             Messenger.Default.Register<Contact>(this, OnContact);
         }
         public override void OnDestroy() {
@@ -54,9 +52,9 @@
         async void OnMessageEvents(Dictionary<long, MessageEvent> events) {
             updatedMessagesIdices.Clear();
             MessageEvent @event = null; int index = 0;
-            foreach(Message message in Messages) {
+            foreach(MessageDto message in Messages) {
                 if(events.TryGetValue(message.ID, out @event) && updatedMessagesIdices.Add(index)) 
-                    @event.Apply(message);
+                   // @event.Apply(message);
                 index++;
             }
             if(events.Count > 0)
@@ -80,7 +78,7 @@
         async Task LoadMessages(IChannel channel, Contact contact) {
             if(channel != null && contact != null) {
                 // var history = await channel.GetHistory(contact);
-                var history = GetMessages(contact);
+                var history = GetMessageDtos(contact);
                 await DispatcherService?.BeginInvoke(() => Messages = history);
             }
         }
@@ -104,7 +102,12 @@
             this.RaiseCanExecuteChanged(x => x.ShowContact());
             this.RaiseCanExecuteChanged(x => x.ShowUser());
         }
-        public virtual IReadOnlyCollection<Message> Messages {
+        //public virtual IReadOnlyCollection<Message> Messages {
+        //    get;
+        //    protected set;
+        //}
+        public virtual IReadOnlyCollection<MessageDto> Messages
+        {
             get;
             protected set;
         }
@@ -115,11 +118,10 @@
         public IReadOnlyCollection<int> UpdatedMessageIndices {
             get { return updatedMessagesIdices.ToArray(); }
         }
-         Message lastMessage;
-       // MessageDto lastMessage;
+         //Message lastMessage;
+        MessageDto lastMessage;
         protected void OnMessagesChanged() {
              lastMessage = Messages.LastOrDefault();
-            
         }
         public virtual string MessageText {
             get;
@@ -224,7 +226,7 @@
         //    }
         //}
         [Command(false)]
-        public void OnMessageRead(Message message)
+        public void OnMessageRead(MessageDto message)
         {
             if (lastMessage != null && message == lastMessage)
             {
@@ -239,6 +241,12 @@
 
             messages = Messgers.Messages.Where(x => x.Owner.ID == Contact.ID).ToList();
             return messages;
+        }
+        private List<MessageDto> GetMessageDtos(Contact Contact)
+        {
+            List<MessageDto> messageDtos = new List<MessageDto>();
+            messageDtos = Messgers.GetMessageDtos().Where(x => x.Owner.ID == Contact.ID).ToList();
+            return messageDtos;
         }
     }
 }
